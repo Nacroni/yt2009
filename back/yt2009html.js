@@ -119,7 +119,7 @@ module.exports = {
         let waitForOgv = false;
 
         // if firefox<=25 wait for ogg, otherwise callback mp4
-        if(userAgent.includes("Firefox/")) {
+        if((userAgent || "").includes("Firefox/")) {
             let ffVersion = parseInt(userAgent.split("Firefox/")[1].split(" ")[0])
             if(ffVersion <= 25 && !useFlash) {
                 waitForOgv = true;
@@ -174,7 +174,19 @@ module.exports = {
                     data.title = videoData.videoDetails.title
                 }
                 catch(error) {
-                    callback(false)
+                    let displayError = "This video is unavailable."
+                    if(videoData.playabilityStatus
+                    && videoData.playabilityStatus.status == "ERROR") {
+                        try {
+                            displayError = videoData.playabilityStatus
+                                           .errorScreen
+                                           .playerErrorMessageRenderer
+                                           .subreason.simpleText
+                        }
+                        catch(error) {}
+                    }
+                    data.error = displayError
+                    callback(data)
                     return;
                 }
 
@@ -1135,7 +1147,6 @@ https://web.archive.org/web/20091111/http://www.youtube.com/watch?v=${data.id}`
 
         // if flash player is used
         // hide the html5 js, fix the layout, put a flash player
-        let env = config.env
         let swfFilePath = "/watch.swf"
         let swfArgPath = "video_id"
         if(req.headers.cookie.includes("alt_swf_path")) {
@@ -1153,7 +1164,6 @@ https://web.archive.org/web/20091111/http://www.youtube.com/watch?v=${data.id}`
         if((req.headers["cookie"] || "").includes("f_h264")) {
             flash_url += "%2Fmp4"
         }
-        flash_url += `&iv_module=http%3A%2F%2F${config.ip}%3A${config.port}%2Fiv_module.swf`
         if(useFlash) {
             code = code.replace(
                 `<!DOCTYPE HTML>`,
@@ -1681,17 +1691,12 @@ https://web.archive.org/web/20091111/http://www.youtube.com/watch?v=${data.id}`
             endscreen_queue.forEach(video => {
                 if(related_index <= 7
                 && encodeURIComponent(rv_url).length < 1700) {
-                    let thumbUrl = "hqdefault.jpg"
-                    if(flags.includes("autogen_thumbnails")) {
-                        thumbUrl = "hq1.jpg"
-                    }
+                    let thumbUrl = yt2009utils.getThumbUrl(video.id, req)
                     rv_url += `&rv.${related_index}.title=${
                         encodeURIComponent(video.title)
                     }`
                     rv_url += `&rv.${related_index}.thumbnailUrl=${
-                        encodeURIComponent(
-                            `http://i.ytimg.com/vi/${video.id}/${thumbUrl}`
-                        )
+                        encodeURIComponent(thumbUrl)
                     }`
                     rv_url += `&rv.${related_index}.length_seconds=${
                         video.length
@@ -1999,6 +2004,14 @@ https://web.archive.org/web/20091111/http://www.youtube.com/watch?v=${data.id}`
 
                 if(req.query.resetcache) {
                     flash_url += "&resetcache=1"
+                }
+
+                if(flash_url.includes("cps2.swf")
+                || flash_url.includes("2012.swf")) {
+                    // the 2 odd ones that just won't work without this
+                    flash_url += "&BASE_YT_URL=" + encodeURIComponent(
+                        "http://" + config.ip + ":" + config.port + "/"
+                    )
                 }
                 
                 code = code.replace(

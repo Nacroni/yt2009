@@ -80,6 +80,7 @@ module.exports = {
                         "authorAvatar": m.author.avatarThumbnailUrl,
                         "authorName": m.author.displayName.replace("@", ""),
                         "authorUrl": "/channel/" + m.author.channelId,
+                        "authorId": m.author.channelId,
                         "content": content,
                         "time": comment_flags.includes("fake_comment_dates")
                                 ? gen_fake_date()
@@ -208,6 +209,8 @@ module.exports = {
                                     .authorThumbnail.thumbnails[1].url,
                     "authorName": authorName,
                     "authorUrl": authorUrl,
+                    "authorId": comment_path_short.authorEndpoint
+                                .browseEndpoint.browseId,
                     "content": commentContent.split("\n\n").join("<br>"),
                     "time": comment_flags.includes("fake_comment_dates")
                             ? gen_fake_date()
@@ -493,7 +496,7 @@ module.exports = {
         }
         let fname = link.split("/")[link.split("/").length - 1]
         if(banner) {
-            fname = link.split("/")[link.split("/").length - 2] + "_banner.jpg"
+            fname = banner + "_banner"
         }
         fname = fname.replace(".png", "")
         if(!fs.existsSync(`../assets/${fname}.png`)) {
@@ -857,8 +860,7 @@ module.exports = {
 
     /*
     ========
-    flag handling for simpler things, move to this in the future
-    actually don't move to this in the future this is horrible
+    flag handling for simpler things
     ========
     */
     "textFlags": function(input, flags, additionalInput) {
@@ -888,7 +890,7 @@ module.exports = {
                 }
             }
         })
-        return tr;
+        return this.xss(tr);
     },
 
     "viewFlags": function(input, flags, additionalInput) {
@@ -952,7 +954,7 @@ module.exports = {
                     .split(">").join("&gt;")
     },
 
-    "saveMp4": function(id, callback) {
+    "saveMp4": function(id, callback, extended) {
         let targetFilePath = `../assets/${id}.mp4`
         let writeStream = fs.createWriteStream(targetFilePath)
         writeStream.on("finish", () => {
@@ -963,10 +965,14 @@ module.exports = {
             "quality": 18
         })
         .on("error", (error) => {
-             callback(false)
-             writeStream.close()
-             return;
-         })
+            if(extended) {
+                callback(error)
+            } else {
+                callback(false)
+            }
+            writeStream.close()
+            return;
+        })
         .pipe(writeStream)
     },
 
@@ -1332,5 +1338,28 @@ module.exports = {
         }
 
         return unduplicateKeywordList;
+    },
+    
+    "getThumbUrl": function(id, req) {
+        if(typeof(req) == "string") {
+            req = {
+                "headers": {
+                    "cookie": req
+                }
+            };
+        }
+        let file = "hqdefault.jpg"
+        if(req.headers
+        && req.headers.cookie
+        && req.headers.cookie.includes("autogen_thumbnails")) {
+            file = "1.jpg"
+        }
+        let fullUrl = "//i.ytimg.com/vi/" + id + "/" + file
+        if(req.headers
+        && req.headers.cookie
+        && req.headers.cookie.includes("thumbnail_proxy")) {
+            fullUrl = "/thumb_proxy?v=" + id
+        }
+        return fullUrl;
     }
 }

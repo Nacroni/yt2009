@@ -13,6 +13,11 @@ the yt2009 container is configured by using the following environment variables:
 - `YT2009_PORT` sets the HTTP port (default: `80`)
 - `YT2009_ENV` sets the usage environment, dev is used for development purposes, prod is designed for production, adds an authentication system and is needed if you want to use the built-in SSL support (default: `dev`)
 - `YT2009_IP` sets the IP/Hostname used that will be used to connect to yt2009, is required for legacy stuff where it has to be hardcoded (default: `127.0.0.1`)
+
+**for YT2009_IP, if you intend to use things like the mobile app, make sure to set it to an address those devices can access!**
+
+**you're most likely looking at using your public IP provided you can port forward.**
+
 - `YT2009_SSL` allows you to enable built-in SSL support, **requires prod env to work!** (default: `false`)
 - `YT2009_SSLPORT` sets the HTTPS port (default: `443`)
 - `YT2009_SSLPATH` sets the path for the SSL certificate (default: `/yt2009/cert.crt`)
@@ -20,7 +25,14 @@ the yt2009 container is configured by using the following environment variables:
 - `YT2009_AUTO_MAINTAIN` sets whether to enable automatic instance cleaning (default: false)
 - `YT2009_MAINTAIN_MAX_SIZE` sets the maximum assets folder size in GB, works with auto_maintain (default: 10)
 - `YT2009_MAINTAIN_MAX_CACHE_SIZE` sets the maximum cache file size in MB, works with auto_maintain (default: 15)
-- `YT2009_PUBLIC` sets the public IP to appear on the live-updating public list, leave empty to disable
+- `YT2009_FALLBACK` sets fallback mode, doesn't use the saved cache, shows a fallback notice on homepage, deprecated (default: false)
+- `YT2009_MASTERSERVER` sets a different master server for comments/video sync, leave empty to disable
+- `YT2009_DISABLEMASTER` sets whether any master server will be used (default: false)
+- `YT2009_LOCKED_TOKENS` sets access tokens that will be redirected to /t.htm, seperated by commas, leave empty to disable
+- `YT2009_HOMEPAGETEXT` sets a custom text that will be shown on the homepage, leave empty to disable
+- `YT2009_REDIR` sets an absolute http path of a different yt2009 instance you wish to redirect to, leave empty to disable
+- `YT2009_LOGGED_TOKENS` sets tokens that have their usage logged in `/data/accessdata`, seperated by commas, leave empty to disable
+- `YT2009_TOKENS` allows you to specify custom auth tokens instead of generating them randomly, **requires prod env to work!**, seperated by commas, leave empty to disable, **this will override any existing access tokens when used!!!**
 
 ## troubleshooting
 #### reading auth tokens from a running container

@@ -21,7 +21,7 @@ const sections = {
     "entertainment": videos.homepageCache_entertainment
 }
 
-function section_fill(code, section_name, section_content, flags, protocol) {
+function section_fill(code, section_name, section_content, flags, req) {
     flags = flags.split(";")
     let views = section_content.views;
     if(flags.includes("realistic_view_count")
@@ -49,16 +49,13 @@ function section_fill(code, section_name, section_content, flags, protocol) {
 
     views = "lang_views_prefix" + views.replace(" views", "lang_views_suffix")
 
-    let thumbUrl = "hqdefault.jpg"
-    if(flags.includes("autogen_thumbnails")) {
-        thumbUrl = "1.jpg"
-    }
+    let thumbUrl = yt2009utils.getThumbUrl(section_content.id, req)
 
     let temp_code = code;
     temp_code = temp_code.split(`/yt2009_${section_name}_watch`)
                          .join(`/watch?v=${section_content.id}`)
     temp_code = temp_code.split(`/yt2009_${section_name}_thumbnail`)
-                         .join(`${protocol}://i.ytimg.com/vi/${section_content.id}/${thumbUrl}`)
+                         .join(thumbUrl)
     temp_code = temp_code.split(`yt2009_${section_name}_title`)
                          .join(title.trim())
     temp_code = temp_code.split(`yt2009_${section_name}_time`)
@@ -73,8 +70,19 @@ function section_fill(code, section_name, section_content, flags, protocol) {
     return temp_code;
 }
 
+let error_sessions = {}
 
 module.exports = function(req, res) {
+    if(req.error) {
+        let t = ""
+        let a = "qwertyuiopasdfghjklzxcvbnm1234567890".split("")
+        while(t.length !== 15) {
+            let r = Math.floor(Math.random() * 36)
+            t += a[r]
+        }
+        error_sessions[t] = yt2009utils.xss(req.error)
+        return t;
+    }
     let flags = req.query.flags || ""
     try {
         req.headers.cookie.split(";").forEach(cookie => {
@@ -134,7 +142,7 @@ module.exports = function(req, res) {
                         `watchednow${watchedNowIndex}`,
                         watched,
                         flags,
-                        req.protocol
+                        req
                     )
                     watchedNowIndex++;
                 })
@@ -160,7 +168,7 @@ module.exports = function(req, res) {
                         `featured${featuredIndex}`,
                         video,
                         flags,
-                        req.protocol
+                        req
                     )
                     featuredIndex++;
                 })
@@ -174,7 +182,7 @@ module.exports = function(req, res) {
                         Math.floor(Math.random() * sections[section].length)
                     ]
                     moduleHTML = section_fill(
-                        moduleHTML, section, vid, flags, req.protocol
+                        moduleHTML, section, vid, flags, req
                     )
                 }
                 break;
@@ -292,6 +300,11 @@ module.exports = function(req, res) {
     && ytsessions[req.query.ytsession]) {
         addNotice = true;
         noticeText = ytsessions[req.query.ytsession]
+    }
+    if(req.query.ytsession
+    && error_sessions[req.query.ytsession]) {
+        addNotice = true
+        noticeText = error_sessions[req.query.ytsession]
     }
 
     if(addNotice) {
