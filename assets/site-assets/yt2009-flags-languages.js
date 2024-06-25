@@ -9,6 +9,7 @@ var languageData_EN = {
         "watch-exclude-cs": "hides comments you post from /comment_search",
         "watch-exp-related": "shows more related videos based on the tags of the currently watched video",
         "watch-fake-upload-date": "fake 2009 upload year",
+        "watch-hd-1080": "HD button in player will load 1080p instead of 720p",
         "watch-homepage-contribute": "videos watched by you will be visible on /videos and a 'Videos being watched now' section on the homepage.",
         "watch-old-banners": "uses old channel banners without wayback_features if possible",
         "watch-realistic-view-count": "more realistic for 2009 view count and rating count",
@@ -38,6 +39,7 @@ var languageData_EN = {
         "channel-wayback-features": "use Wayback Machine data for yt2009",
 
         "mainpage-disable-fallback": "hides fallback mode warning",
+        "mainpage-new-recommended": "will show new videos on the recommended section",
         "mainpage-realistic-view-count": "more realistic for 2009 view counts",
         "mainpage-remove-username-space": "removes spaces from usernames",
         "mainpage-username-asciify": "remove special characters from usernames",
@@ -48,6 +50,7 @@ var languageData_EN = {
         "global-autogen-thumbnails": "use automatically generated thumbnails",
         "global-fake-dates": "fake upload and comment dates",
         "global-login-simulate": "simulates a logged in user",
+        "global-new-suggestions": "shows new suggestions in search box",
         "global-no-controls-fade": "disables video controls fade out",
         "global-annotation-redirect": "redirects all youtube.com links within annotations to yt2009",
         "global-shows-tab": "shows a Shows tab (only for demo, doesn't actually work)",
